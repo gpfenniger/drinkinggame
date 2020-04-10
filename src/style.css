@@ -17,14 +17,8 @@ li {
     padding: 5px 10px;
     border-left-style: solid;
     border-left-width: 3px;
-    border-left-color: #bf616a;
+    border-left-color: #81a1c1;
 }
-
-/*
-li:nth-child(odd) {
-    background-color: #eee;
-}
-*/
 
 form {
     background-color: #2e3440;
@@ -58,4 +52,15 @@ button {
 
 h1 {
     text-align: center;
+}
+
+@media only screen and (max-width: 600px) {
+    input[type="text"] {
+        font-size: 16px;
+        width: 65%;
+    }
+
+    ul {
+        margin-bottom: 100px;
+    }
 }

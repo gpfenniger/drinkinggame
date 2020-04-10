@@ -19,7 +19,9 @@ let MessageDisplay = (props) => {
                 challenge
             </li>
             {messages.map((message, index) => (
-                <li key={index}>{message}</li>
+                <li key={index} style={{ borderLeftColor: message.colour }}>
+                    {message.text}
+                </li>
             ))}
         </ul>
     );

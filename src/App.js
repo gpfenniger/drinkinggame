@@ -12,7 +12,7 @@ let App = () => {
 
     return (
         <>
-            <h1>Machine Spirit of the Drinking God</h1>
+            <h1>Drinking Game</h1>
             <MessageDisplay s={socket} />
             <MessageForm s={socket} id={id} />
         </>

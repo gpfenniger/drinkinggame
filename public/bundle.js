@@ -2676,7 +2676,7 @@ module.exports = function (a, b) {
 var ___CSS_LOADER_API_IMPORT___ = __webpack_require__(/*! ../node_modules/css-loader/dist/runtime/api.js */ "./node_modules/css-loader/dist/runtime/api.js");
 exports = ___CSS_LOADER_API_IMPORT___(false);
 // Module
-exports.push([module.i, "body {\n    font-family: sans-serif;\n    background-color: #242933;\n    color: #eceff4;\n}\n\nul {\n    list-style-type: none;\n    background-color: #2e3440;\n    margin: 0;\n    padding: 20px 15px;\n    border-radius: 5px;\n}\n\nli {\n    margin-bottom: 5px;\n    padding: 5px 10px;\n    border-left-style: solid;\n    border-left-width: 3px;\n    border-left-color: #bf616a;\n}\n\n/*\nli:nth-child(odd) {\n    background-color: #eee;\n}\n*/\n\nform {\n    background-color: #2e3440;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n    padding: 15px;\n    position: fixed;\n    bottom: 0;\n    left: 0;\n}\n\ninput[type=\"text\"] {\n    width: 85%;\n    border-width: 3px;\n    border-color: #8fbcbb;\n    background-color: #d8dee9;\n    border-radius: 5px;\n}\n\ninput[type=\"text\"]:focus {\n    border-color: #5381ac;\n}\n\nbutton {\n    margin: auto;\n    background-color: #d8dee9;\n    padding: 6px 15px;\n    border-radius: 5px;\n}\n\nh1 {\n    text-align: center;\n}\n", ""]);
+exports.push([module.i, "body {\n    font-family: sans-serif;\n    background-color: #242933;\n    color: #eceff4;\n}\n\nul {\n    list-style-type: none;\n    background-color: #2e3440;\n    margin: 0;\n    padding: 20px 15px;\n    border-radius: 5px;\n}\n\nli {\n    margin-bottom: 5px;\n    padding: 5px 10px;\n    border-left-style: solid;\n    border-left-width: 3px;\n    border-left-color: #81a1c1;\n}\n\nform {\n    background-color: #2e3440;\n    display: flex;\n    flex-direction: row;\n    width: 100%;\n    padding: 15px;\n    position: fixed;\n    bottom: 0;\n    left: 0;\n}\n\ninput[type=\"text\"] {\n    width: 85%;\n    border-width: 3px;\n    border-color: #8fbcbb;\n    background-color: #d8dee9;\n    border-radius: 5px;\n}\n\ninput[type=\"text\"]:focus {\n    border-color: #5381ac;\n}\n\nbutton {\n    margin: auto;\n    background-color: #d8dee9;\n    padding: 6px 15px;\n    border-radius: 5px;\n}\n\nh1 {\n    text-align: center;\n}\n\n@media only screen and (max-width: 600px) {\n    input[type=\"text\"] {\n        font-size: 16px;\n        width: 65%;\n    }\n\n    ul {\n        margin-bottom: 100px;\n    }\n}\n", ""]);
 // Exports
 module.exports = exports;
 
@@ -18361,7 +18361,7 @@ var App = function App() {
   socket.on("register", function (id) {
     setid(id);
   });
-  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_0___default.a.Fragment, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h1", null, "Machine Spirit of the Drinking God"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_MessageDisplay__WEBPACK_IMPORTED_MODULE_2__["default"], {
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_0___default.a.Fragment, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h1", null, "Drinking Game"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_MessageDisplay__WEBPACK_IMPORTED_MODULE_2__["default"], {
     s: socket
   }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(_MessageForm__WEBPACK_IMPORTED_MODULE_1__["default"], {
     s: socket,
@@ -18410,8 +18410,11 @@ var MessageDisplay = function MessageDisplay(props) {
   });
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("ul", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, "Send a message by using the input bar below. Your first message will register as your name"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", null, "Send the phrase 'hit me' in your message to display a drinking challenge"), messages.map(function (message, index) {
     return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("li", {
-      key: index
-    }, message);
+      key: index,
+      style: {
+        borderLeftColor: message.colour
+      }
+    }, message.text);
   }));
 };
 
@@ -18459,6 +18462,7 @@ var MessageForm = function MessageForm(props) {
       props.s.emit("register", e.target[0].value);
       setFirst(true);
     }
+    e.target[0].value = "";
   };
 
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("form", {

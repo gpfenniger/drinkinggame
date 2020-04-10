@@ -14,6 +14,7 @@ let MessageForm = (props) => {
             props.s.emit("register", e.target[0].value);
             setFirst(true);
         }
+        e.target[0].value = "";
     };
 
     return (
