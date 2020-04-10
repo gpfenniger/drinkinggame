@@ -27,10 +27,10 @@ let colours = [
 app.use(express.static("public"));
 
 /**
-    Gets a users name and colour from their id
-    @param { String } id
-    @returns { Promise<{String, String}> }
-*/
+ *   Gets a users name and colour from their id
+ *   @param { String } id
+ *   @returns { Promise<{String, String}> }
+ */
 let getUserInfo = (id) => {
     return new Promise((resolve, reject) => {
         let user = users.filter((u) => u.id == id);
@@ -41,9 +41,9 @@ let getUserInfo = (id) => {
 };
 
 /**
-    Returns a random colour from the list and makes sure there's no repeats
-    @returns { Promise<String> }
-*/
+ *   Returns a random colour from the list and makes sure there's no repeats
+ *   @returns { Promise<String> }
+ */
 let randomColour = () => {
     return new Promise((resolve, reject) => {
         colour = colours[Math.floor(Math.random() * colours.length)];
@@ -53,6 +53,12 @@ let randomColour = () => {
     });
 };
 
+/**
+ *  Registers a user and gives them a random colour
+ *  @param { String } name
+ *  @param { String } id
+ *  @returns { Promise<{String, String}> }
+ */
 let registerUser = (name, id) => {
     return new Promise((resolve, reject) => {
         randomColour()
@@ -67,6 +73,10 @@ let registerUser = (name, id) => {
     });
 };
 
+/**
+ *  Gets a random challenge and tries to make sure its not a repeat
+ *  @returns { Promise<{String, String}> }
+ */
 let getChallenge = () => {
     return new Promise((resolve, reject) => {
         let challenge =
@@ -81,6 +91,11 @@ let getChallenge = () => {
     });
 };
 
+/**
+ * Sends the messages to other devices and looks for a challenge
+ * @param {{String, String}} msg { text, id }
+ * @returns { Promise<{String, String}> }
+ */
 let broadcastMessage = (msg) => {
     return new Promise((resolve, reject) => {
         getUserInfo(msg.id)
@@ -107,6 +122,11 @@ let broadcastMessage = (msg) => {
     });
 };
 
+/**
+ * Takes a user off the list and returns the colour to the pool
+ * @param {String} id
+ * @returns {Boolean}
+ */
 let deregister = (id) => {
     return new Promise((resolve, reject) => {
         getUserInfo(id)
