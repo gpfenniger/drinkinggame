@@ -1,16 +1,20 @@
 const express = require("express");
 const uuid = require("uuid").v4;
-let app = express();
-
-app.use(express.static("public"));
-
+const app = express();
 const http = require("http").createServer(app);
 const io = require("socket.io")(http);
 
+// This colour is used for text borders when the server sends a message
 const SERVER_COLOUR = "#8FBCBB";
+// Passphrase for sending challenge
+const PASSPHRASE = /hit me/i;
+// A full list of all the challenges
 let allChallenges = require("./cards.json");
+// A list of challenges in circulation
 let challenges = allChallenges;
+// Users are appended to this list with an id, name and colour
 let users = [];
+// List of possible colours users can be assigned
 let colours = [
     "#5e81ac",
     "#bf616a",
@@ -20,61 +24,127 @@ let colours = [
     "#b48ead",
 ];
 
+app.use(express.static("public"));
+
+/**
+    Gets a users name and colour from their id
+    @param { String } id
+    @returns { Promise<{String, String}> }
+*/
 let getUserInfo = (id) => {
-    let user = users.filter((u) => u.id == id);
-    if (user[0] != undefined)
-        return { name: user[0].name, colour: user[0].colour };
-    return { name: "undefined", colour: "blue" };
+    return new Promise((resolve, reject) => {
+        let user = users.filter((u) => u.id == id);
+        if (user.length == 0)
+            resolve({ name: "undefined", colour: SERVER_COLOUR });
+        resolve({ name: user[0].name, colour: user[0].colour });
+    });
 };
 
+/**
+    Returns a random colour from the list and makes sure there's no repeats
+    @returns { Promise<String> }
+*/
 let randomColour = () => {
-    colour = colours[Math.floor(Math.random() * colours.length)];
-    colours = colours.filter((c) => c != colour);
-    return colour;
+    return new Promise((resolve, reject) => {
+        colour = colours[Math.floor(Math.random() * colours.length)];
+        colours = colours.filter((c) => c != colour);
+        if (colour == undefined) reject(new Error("Colour is Undefined"));
+        resolve(colour);
+    });
+};
+
+let registerUser = (name, id) => {
+    return new Promise((resolve, reject) => {
+        randomColour()
+            .then((colour) => {
+                users.push({ id: id, name: name, colour: colour });
+                resolve({
+                    text: `Welcome, ${name}!`,
+                    colour: SERVER_COLOUR,
+                });
+            })
+            .catch((e) => reject(e));
+    });
+};
+
+let getChallenge = () => {
+    return new Promise((resolve, reject) => {
+        let challenge =
+            challenges[Math.floor(Math.random() * challenges.length)];
+        challenges = challenges.filter((c) => c != challenge);
+        if (challenges.length == 0) challenges = allChallenges;
+        resolve({
+            text: challenge,
+            colour: SERVER_COLOUR,
+        });
+        reject(new Error("Failed to get challenge"));
+    });
+};
+
+let broadcastMessage = (msg) => {
+    return new Promise((resolve, reject) => {
+        getUserInfo(msg.id)
+            .then(({ name, colour }) => {
+                if (PASSPHRASE.test(msg.text)) {
+                    resolve({
+                        challenge: getChallenge(),
+                        msg: {
+                            text: `${name}: ${msg.text}`,
+                            colour: colour,
+                        },
+                    });
+                } else {
+                    resolve({
+                        msg: {
+                            text: `${name}: ${msg.text}`,
+                            colour: colour,
+                        },
+                    });
+                }
+                reject(new Error("Failed to process message"));
+            })
+            .catch((e) => reject(e));
+    });
+};
+
+let deregister = (id) => {
+    return new Promise((resolve, reject) => {
+        getUserInfo(id)
+            .then(({ colour }) => {
+                colours.push(colour);
+                users = users.filter((user) => user.id != id);
+                resolve();
+                reject(new Error("Failed to deregister user"));
+            })
+            .catch((e) => reject(e));
+    });
 };
 
 io.on("connection", (socket) => {
+    // This first section handles registering new users, their first text input
+    // will register as their user name and they are assigned a random colour
     let userid = uuid();
     socket.emit("register", userid);
     socket.on("register", (name) => {
-        users.push({ id: userid, name: name, colour: randomColour() });
-        io.emit("chat message", {
-            text: `Welcome, ${name}!`,
-            colour: SERVER_COLOUR,
-        });
+        registerUser(name, userid)
+            .then((msg) => io.emit("chat message", msg))
+            .catch((e) => console.error(e));
     });
 
-    console.log("a user connected");
     socket.on("chat message", (msg) => {
-        console.log(`Message: ${msg.text}`);
-        let { name, colour } = getUserInfo(msg.id);
-        io.emit("chat message", {
-            text: `${name}: ${msg.text}`,
-            colour: colour,
-        });
-
-        if (/hit me/i.test(msg.text)) {
-            let challenge =
-                challenges[Math.floor(Math.random() * challenges.length)];
-            io.emit("chat message", {
-                text: challenge,
-                colour: SERVER_COLOUR,
-            });
-            challenges = challenges.filter((c) => c != challenge);
-            if (challenges.length == 0) {
-                challenges = allChallenges;
-                io.emit("chat message", {
-                    text: "Shuffling Challenges",
-                    colour: SERVER_COLOUR,
-                });
-            }
-        }
+        broadcastMessage(msg)
+            .then((result) => {
+                io.emit("chat message", result.msg);
+                if (result.challenge != undefined)
+                    result.challenge
+                        .then((res) => io.emit("chat message", res))
+                        .catch((e) => console.error(e));
+            })
+            .catch((e) => console.error(e));
     });
+
     socket.on("disconnect", () => {
-        console.log("user disconnected");
-        let { colour } = getUserInfo(userid);
-        colours.push(colour);
-        users = users.filter((user) => user.id != userid);
+        deregister(userid);
     });
 });
 
