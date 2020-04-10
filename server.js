@@ -26,6 +26,10 @@ let colours = [
 
 app.use(express.static("public"));
 
+app.get("/", (req, res) => {
+    res.sendFile(__dirname + "/public/index.html")
+})
+
 /**
  *   Gets a users name and colour from their id
  *   @param { String } id
@@ -168,6 +172,6 @@ io.on("connection", (socket) => {
     });
 });
 
-http.listen(3000, () => {
-    console.log("Listening on port 3000");
+http.listen(process.env.PORT || 3000, () => {
+    console.log(`Listening on port 4{process.env.PORT || 3000}`);
 });
