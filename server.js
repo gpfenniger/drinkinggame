@@ -6,8 +6,10 @@ const io = require("socket.io")(http);
 
 // This colour is used for text borders when the server sends a message
 const SERVER_COLOUR = "#8FBCBB";
+// Pattern for changing the passphrase
+const CHANGE = /passphrase/i;
 // Passphrase for sending challenge
-const PASSPHRASE = /hit me/i;
+let PASSPHRASE = /hit me/i;
 // A full list of all the challenges
 let allChallenges = require("./cards.json");
 // A list of challenges in circulation
@@ -27,8 +29,8 @@ let colours = [
 app.use(express.static("public"));
 
 app.get("/", (req, res) => {
-    res.sendFile(__dirname + "/public/index.html")
-})
+    res.sendFile(__dirname + "/public/index.html");
+});
 
 /**
  *   Gets a users name and colour from their id
@@ -88,7 +90,7 @@ let getChallenge = () => {
         challenges = challenges.filter((c) => c != challenge);
         if (challenges.length == 0) challenges = allChallenges;
         resolve({
-            text: challenge,
+            text: `Challenge: ${challenge}`,
             colour: SERVER_COLOUR,
         });
         reject(new Error("Failed to get challenge"));
@@ -104,7 +106,15 @@ let broadcastMessage = (msg) => {
     return new Promise((resolve, reject) => {
         getUserInfo(msg.id)
             .then(({ name, colour }) => {
-                if (PASSPHRASE.test(msg.text)) {
+                if (CHANGE.test(msg.text)) {
+                    PASSPHRASE = new RegExp(/[a-z]*$/i.exec(msg.text));
+                    resolve({
+                        msg: {
+                            text: `${name} has changed the passphrase`,
+                            colour: SERVER_COLOUR,
+                        },
+                    });
+                } else if (PASSPHRASE.test(msg.text)) {
                     resolve({
                         challenge: getChallenge(),
                         msg: {
@@ -173,5 +183,5 @@ io.on("connection", (socket) => {
 });
 
 http.listen(process.env.PORT || 3000, () => {
-    console.log(`Listening on port 4{process.env.PORT || 3000}`);
+    console.log(`Listening on port ${process.env.PORT || 3000}`);
 });
