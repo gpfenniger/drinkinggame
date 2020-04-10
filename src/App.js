@@ -1,31 +1,20 @@
 import React, { useState } from "react";
+import MessageForm from "./MessageForm";
+import MessageDisplay from "./MessageDisplay";
 const socket = require("socket.io-client")();
 
 let App = () => {
-    let [messages, setMessages] = useState([]);
+    let [id, setid] = useState("");
 
-    socket.on("chat message", (msg) => {
-        let newMessages = messages.concat([msg]);
-        setMessages(newMessages);
+    socket.on("register", (id) => {
+        setid(id);
     });
-
-    let sendMessage = (e) => {
-        e.preventDefault();
-        socket.emit("chat message", e.target[0].value);
-    };
 
     return (
         <>
-            <h1>Messenger</h1>
-            <ul>
-                {messages.map((message, index) => (
-                    <li key={index}>{message}</li>
-                ))}
-            </ul>
-            <form onSubmit={sendMessage}>
-                <input type="text"></input>
-                <button>Send</button>
-            </form>
+            <h1>Machine Spirit of the Drinking God</h1>
+            <MessageDisplay s={socket} />
+            <MessageForm s={socket} id={id} />
         </>
     );
 };
